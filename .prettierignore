@@ -1,0 +1,13 @@
+[Bb]uild*
+[Dd]ist*
+[Bb]in*
+package-lock.json
+node_modules
+npm-debug.log
+yarn-error.log
+yarn-debug.log
+yarn.lock
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local

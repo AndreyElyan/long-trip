@@ -1,0 +1,125 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-1.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Trips {
+  id          Int      @id @default(autoincrement())
+  tripId      String   @unique @default(cuid())
+  origin      String
+  destination String
+  lat         Float    @default(0)
+  lng         Float    @default(0)
+  latDest     Float    @default(0)
+  lngDest     Float    @default(0)
+  date        String
+  time        String
+  distance    Float
+  duration    Float
+  cost        Float
+  status      String
+  seats       Int
+  carInfoId   Int
+  driverId    String
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  tripType    String
+
+  passengers TripPassenger[]
+  driver     Users           @relation("driver_trips", fields: [driverId], references: [id])
+
+  @@index([id])
+}
+
+model Users {
+  id               String            @id
+  name             String
+  imageUrl         String
+  lastName         String
+  dateOfBirth      String
+  gender           String
+  cellPhone        String
+  password         String
+  resetToken       Int               @default(0)
+  resetTokenExpiry DateTime          @default(now())
+  email            String            @unique
+  conversation     Boolean           @default(false)
+  music            Boolean           @default(false)
+  smoking          Boolean           @default(false)
+  pets             Boolean           @default(false)
+  hadVaccines      Boolean           @default(false)
+  eatFood          Boolean           @default(false)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  vehicles         UserCarInfo[]
+  evaluations      Evaluations[]
+  preferences      UserPreferences[]
+
+  tripsAsDriver    Trips[]         @relation("driver_trips")
+  tripsAsPassenger TripPassenger[] @relation("passenger_trips")
+
+  @@index([id])
+}
+
+model TripPassenger {
+  id      Int    @id @default(autoincrement())
+  usersId String
+  tripsId String
+  status  String @default("pending")
+  user    Users  @relation("passenger_trips", fields: [usersId], references: [id])
+  trip    Trips  @relation(fields: [tripsId], references: [tripId])
+
+  @@index([id])
+}
+
+model UserPreferences {
+  id     Int    @id @default(autoincrement())
+  user   Users  @relation(fields: [userId], references: [id])
+  userId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([id])
+}
+
+model Evaluations {
+  id          Int      @id @default(autoincrement())
+  evaluation  Int
+  description String
+  tripId      String
+  passengerId String
+  driverId    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  Users       Users?   @relation(fields: [usersId], references: [id])
+  usersId     String?
+
+  @@index([id])
+}
+
+model UserCarInfo {
+  id           Int      @id @default(autoincrement())
+  user         Users    @relation(fields: [userId], references: [id])
+  category     String
+  userId       String
+  model        String
+  make         String
+  year         String
+  color        String
+  licensePlate String
+  imageUrl     String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([id])
+}
